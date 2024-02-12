@@ -1,0 +1,1 @@
+export  const mongodb_url="mongodb+srv://mekacham381:mekacham381@cluster0.c0q0vb8.mongodb.net/?retryWrites=true&w=majority"
