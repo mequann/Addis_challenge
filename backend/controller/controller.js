@@ -3,10 +3,10 @@ const songController = {
     // Create a new song
     createSong: async (req, res) => {
       try {
-        console.log('here')
+        // console.log('here')
         const song = new Song(req.body);
        
-        console.log(song)
+        console.log(song,'from song')
         await song.save();
         // if (song.title.length>1) {
         //   return res.status(400).send('this song already exists');
@@ -38,7 +38,9 @@ const songController = {
         if (!song) {
           return res.status(404).send();
         }
-        res.status(200).send(song);
+        else{ res.status(200).send(song);
+          console.log(song)
+      }
       } catch (error) {
         res.status(400).send(error);
       }

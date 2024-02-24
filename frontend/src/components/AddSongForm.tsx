@@ -1,40 +1,3 @@
-// import React, { useRef } from 'react'
-// import { useAppDispatch } from '../store/store'
-
-// const addSong = () => {
-//     const title = useRef<string>('')
-// const artist = useRef<string>('')
-// const album = useRef<string>('')
-// const genre = useRef<string>('')
-// // const song=useRef<[]>([])
-//   return (
-//     <div>
-//         <form onSubmit={()=>useAppDispatch(addSong())}>
-//             <label htmlFor="title">Title</label>
-
-//             <input type="text" id="title" name="title" 
-//             onChange={(e)=>title.current=e.target.value}
-//             />
-//             <label htmlFor="artist">Artist</label>
-//             <input type="text"  id='artist' name='artist'
-//             onChange={e=>artist.current=e.target.value}/>
-//             <label htmlFor="album">Album</label>
-//             <input type="text"  id='album' name='album'
-//             onChange={(e)=>(album.current=e.target.value)}
-//             />
-//             <label htmlFor="genre">Genre</label>
-//             <input type="text"  id='genre' name='genre'
-//             onChange={(e)=>(genre.current=e.target.value)}
-            
-//             />
-//                <button >Add</button>
-//         </form>
-     
-//     </div>
-//   )
-// }
-
-// export default addSong
 import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { useAppDispatch, useAppSelector }from '../store/store';
 import { addSong } from '../store/features/songSlice';
@@ -53,7 +16,7 @@ import { Song} from '../store/features/songSlice';
 const AddSongForm = () => {
   const dispatch = useAppDispatch();
   const [formData, setFormData] = useState<Song>({
-    id:'',
+    _id:'',
     title: '',
     artist: '',
     album: '',
@@ -71,7 +34,7 @@ const AddSongForm = () => {
     e.preventDefault();
   dispatch(addSong(formData))
     setFormData({
-      id:'',
+      _id:'',
       title: '',
       artist: '',
       album: '',

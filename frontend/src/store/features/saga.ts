@@ -1,86 +1,101 @@
 // saga.ts
-import { put, takeLatest, all, call ,takeEvery} from 'redux-saga/effects';
-import AddSongForm from '../../components/AddSongForm';
-
-// import { api } from '../../services/api';
-import { getSongs,fetchSongsFailure ,addSong} from './songSlice';
-import axios from 'axios'
+import { put, takeEvery, all, call } from 'redux-saga/effects';
+import axios from 'axios';
+import { getSongs, fetchSongsFailure, addSong ,deleteSong,updateSong} from './songSlice';
 import { PayloadAction } from '@reduxjs/toolkit';
 
+// Saga for fetching songs
 export function* fetchSongs(): Generator<any, void, any> {
   try {
-
-    const response = yield call( ()=>axios.get('http://localhost:3000/api/songs'));
+    const response = yield call(() => axios.get('http://localhost:3000/api/songs'));
     const data = yield response.data;
-    console.log(data)
-      console.log('fetch good')
-    // const data = yield response.json();
-    
+    // console.log(data);
+    // console.log('Fetch successful');
     yield put(getSongs(data));
-  } catch (error:any) { 
+  } catch (error: any) {
     yield put(fetchSongsFailure(error.message));
+
   }
 }
-function *songSaga(){
-  takeEvery('songs/getSongs',fetchSongs)
-  // takeEvery('songs/addsong',addSongs)
-  console.log('ima good also here')
 
-}
-
-function* addSongSaga():Generator<any, void, any>  {
+// Saga for adding a song
+function* addSongSaga(action:PayloadAction ): Generator<any, void, any> {
   try {
-    const response = yield call(() => fetch('http://localhost:3000/api/songs', { method: 'POST',headers: {
-      'Content-Type': 'application/json'
-    }}));
-    const data = yield response.json();
-
+    
+    const response = yield call(() =>
+      axios.post('http://localhost:3000/api/songs',action.payload)
+    );
+    console.log('from addsong')
+    // Assuming the response.data is the song object you want to add
+    const data = response.data;
+    
+    console.log(data);
     yield put(addSong(data)); // Dispatch success action
-  } catch (error:any) {
+  } catch (error: any) {
     yield put(fetchSongsFailure(error.message)); // Dispatch failure action
   }
 }
+function* deleteSongSaga(action: PayloadAction<{id:string}>): Generator<any, void, any> {
+  try {
+    const {id}=action.payload
+  yield call(()=>axios.delete(`http://localhost:3000/api/songs/${action.payload}`));
+    yield put(deleteSong(id)); // Dispatch success action
+  } catch (error: any) {
+    yield put(fetchSongsFailure(error.message)); // Dispatch failure action
+  }
+}
+//function  for update
+// Function for updating a song
+function* updateSongSaga(action: PayloadAction<string>): Generator<any, void, any> {
+  try {
+    const response = yield call(() =>
+      axios.put(`http://localhost:3000/api/songs/${action.payload}`, action.payload)
+    );
 
-export function* watchAddSong() {
-  yield takeEvery('songs/addSong', addSongSaga); // Update with your actual action name
+    // Assuming the response.data is the updated song object
+    const data = response.data;
+    console.log('Song updated successfully');
+    yield put(updateSong(data)); // Dispatch success action
+  } catch (error: any) {
+    yield put(fetchSongsFailure(error.message)); // Dispatch failure action
+  }
+}
+// Saga for handling song-related actions
+export function* songSaga() {
+  yield takeEvery('songs/getSongs', fetchSongs);
+  // yield takeEvery('songs/addsong', addSongs); // Uncomment and customize if needed
+  console.log('Saga initialized');
 }
 
+// Saga watcher for adding a song
+export function* watchAddSong() {
+  yield takeEvery('songs/addSong', addSongSaga); 
+}
+//delet watchsaga
+export function* watchdeletesong() {
+  yield takeEvery('songs/deleteSong', deleteSongSaga);
+}
+//watcher for update
+export function* watchUpdateSong() {
+  yield takeEvery('songs/updateSong', updateSongSaga);
+}
 
-// function* updateSong(action:{payload:any}):Generator<any,void,any> {
-//   try {
-//     const response = yield call(api.put, `/songs/${action.payload.id}`, action.payload);
-//     yield put(actions.updateSongRequest(response.data));
-//   } catch (error:any) {
-//     yield put(actions.fetchSongsFailure(error.message));
-//   }
-// }
-
-// function* deleteSong(action:{payload:any}) {
-//   try {
-//     yield call(api.delete, `/songs/${action.payload}`);
-//     yield put(actions.deleteSongSuccess(action.payload));
-//   } catch (error:any) {
-//     yield put(actions.fetchSongsFailure(error.message));
-//   }
-// }
-
-// export function* songsSaga() :Generator<any,void,any>{
-//   yield all([
-//     takeLatest(actions.fetchSongsRequest.type, fetchSongs),
-//     takeLatest(actions.addSongSuccess, addSong),
-//     takeLatest(actions.updateSongRequest, updateSong),
-//     takeLatest(actions.deleteSongSuccess, deleteSong),
-//   ]);
-// }
-export  function* rootSaga():Generator<any, void, any> {
+// Root saga combining all sagas
+export function* rootSaga(): Generator<any, void, any> {
   yield all([
     fetchSongs(),
-    addSongSaga(),
+    // addSongSaga(),
     songSaga(),
-    watchAddSong,
-    // watchDeleteSong(),
-    // Add other sagas if needed
+    watchAddSong(),
+   watchdeletesong(),
+   watchUpdateSong()
   ]);
 }
 
-export default songSaga
+// Export the root saga
+export default rootSaga;
+
+
+
+
+
